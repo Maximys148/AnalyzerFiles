@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>File Damage Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0; /* однотонный фон */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            background-color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+        .btn-custom {
+            border-radius: 24px;
+            padding: 0.8rem 2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary-custom {
+            background-color: #495057;
+            color: white;
+            border: none;
+        }
+        .btn-primary-custom:hover {
+            background-color: #343a40;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4"><i class="bi bi-file-earmark-binary me-2"></i>Анализатор поврежденных файлов</h1>
+
+    <form id="analyzeForm" class="mb-4">
+        <div class="mb-3">
+            <label for="originalDir" class="form-label">Оригинальная директория</label>
+            <input type="text" id="originalDir" class="form-control" placeholder="/usr/bin" value="/usr/bin" required>
+        </div>
+        <div class="mb-3">
+            <label for="damagedDir" class="form-label">Директория с повреждениями</label>
+            <input type="text" id="damagedDir" class="form-control" placeholder="/tmp/damaged_bin" value="/tmp/damaged_bin" required>
+        </div>
+        <button type="submit" id="analyzeBtn" class="btn btn-primary-custom btn-custom w-100">
+            <i class="bi bi-play-fill me-2"></i>Запустить анализ
+        </button>
+    </form>
+
+    <div id="messageDiv" class="alert d-none" role="alert"></div>
+
+    <button id="getResultsBtn" class="btn btn-secondary btn-custom w-100 d-none mb-4">
+        <i class="bi bi-list-check me-2"></i>Получить Результаты
+    </button>
+
+    <div id="resultsSection" class="d-none">
+        <h3>Результаты анализа:</h3>
+        <table class="table table-striped table-hover mt-3">
+            <thead>
+            <tr>
+                <th>Файл</th>
+                <th>Статус</th>
+                <th>Повреждений</th>
+            </tr>
+            </thead>
+            <tbody id="resultsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const analyzeForm = document.getElementById('analyzeForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const messageDiv = document.getElementById('messageDiv');
+    const getResultsBtn = document.getElementById('getResultsBtn');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsTableBody = document.getElementById('resultsTableBody');
+
+    analyzeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        analyzeBtn.disabled = true;
+        showMessage('Анализ запущен. Пожалуйста, подождите его завершения...', 'info');
+        getResultsBtn.classList.add('d-none');
+        resultsSection.classList.add('d-none');
+
+        const originalDir = document.getElementById('originalDir').value;
+        const damagedDir = document.getElementById('damagedDir').value;
+
+        try {
+            const resp = await fetch('/api/v1/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({originalDir, damagedDir})
+            });
+            const data = await resp.json();
+            if (data.status === 'started') {
+                // анализ запущен, опрос не нужен
+                showMessage('✅ Анализ завершён. Вы можете получить результаты.', 'success');
+                getResultsBtn.classList.remove('d-none');
+            } else {
+                throw new Error(data.message || 'Неизвестный ответ от сервера');
+            }
+        } catch (err) {
+            showMessage('Ошибка запуска анализа: ' + err.message, 'danger');
+        } finally {
+            analyzeBtn.disabled = false;
+        }
+    });
+
+    getResultsBtn.addEventListener('click', async () => {
+        showMessage('Загрузка результатов...', 'info');
+        try {
+            const resp = await fetch('/api/v1/results');
+            const data = await resp.json();
+
+            if (data.status === 'ready' && data.fileStatuses.length > 0) {
+                renderResults(data);
+                showMessage('Результаты успешно получены', 'success');
+                resultsSection.classList.remove('d-none');
+            } else if (data.status === 'running') {
+                showMessage('Анализ ещё выполняется. Попробуйте позже.', 'warning');
+            } else {
+                showMessage('Результаты отсутствуют.', 'warning');
+            }
+        } catch (err) {
+            showMessage('Ошибка получения результатов: ' + err.message, 'danger');
+        }
+    });
+
+    function renderResults(data) {
+        resultsTableBody.innerHTML = '';
+        data.fileStatuses.forEach(file => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${file.fileName}</td>
+                <td>${file.status}</td>
+                <td>${file.damageCount || 0}</td>
+            `;
+            resultsTableBody.appendChild(tr);
+        });
+    }
+
+    function showMessage(msg, type) {
+        messageDiv.textContent = msg;
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.classList.remove('d-none');
+        setTimeout(() => {
+            messageDiv.classList.add('d-none');
+        }, 6000);
+    }
+</script>
+</body>
+</html>
