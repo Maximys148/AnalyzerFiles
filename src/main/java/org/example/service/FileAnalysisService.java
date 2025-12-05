@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -26,17 +27,10 @@ public class FileAnalysisService {
     private final Map<String, FileStatusDto> fileStatuses = new ConcurrentHashMap<>();
     private final Map<String, List<FileDamageDetailDto>> fileDamages = new ConcurrentHashMap<>();
 
-    /**
-     * -- GETTER --
-     *  Check if analysis is currently running
-     */
     @Getter
     private volatile boolean analysisRunning = false;
     private final Logger log = LogManager.getLogger(FileAnalysisService.class);
 
-    /**
-     * Set directories for analysis
-     */
     public void setDirectories(String originalDir, String damagedDir) {
         this.originalDir = originalDir;
         this.damagedDir = damagedDir;
@@ -157,13 +151,6 @@ public class FileAnalysisService {
     }
 
     /**
-     * Get all file statuses
-     */
-    public List<FileStatusDto> getFileStatuses() {
-        return new ArrayList<>(fileStatuses.values());
-    }
-
-    /**
      * Get analysis statistics
      */
     public AnalysisStats getAnalysisStats() {
@@ -179,4 +166,26 @@ public class FileAnalysisService {
 
         return stats;
     }
+
+    public List<FileStatusDto> getFileStatuses() {
+        return fileStatuses.values().stream()
+                .map(status -> {
+                    List<FileDamageDetailDto> damages = getFileDamages(status.getFileName());
+                    FileStatusDto dto = new FileStatusDto();
+                    dto.setFileName(status.getFileName());
+                    dto.setStatus(status.getStatus());
+                    dto.setDamageCount(status.getDamageCount());
+                    dto.setDamages(damages);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get detailed damages for specific file (separate API)
+     */
+    public List<FileDamageDetailDto> getFileDamages(String fileName) {
+        return fileDamages.getOrDefault(fileName, Collections.emptyList());
+    }
+
 }
