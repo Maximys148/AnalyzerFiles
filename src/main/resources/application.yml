@@ -17,8 +17,7 @@ management:
 logging:
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: ${logging.file.name:/var/log/analyzerfiles/application.log}
+
   level:
     root: INFO
     org.springframework.web: DEBUG
