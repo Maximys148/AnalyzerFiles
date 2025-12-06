@@ -1,2 +1,24 @@
+
 server:
   port: 8099
+spring:
+  application:
+    name: analyzerfiles
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${logging.file.name:/var/log/analyzerfiles/application.log}
+  level:
+    root: INFO
+    org.springframework.web: DEBUG

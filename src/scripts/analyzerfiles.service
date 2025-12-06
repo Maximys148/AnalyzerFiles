@@ -1,0 +1,19 @@
+[Unit]
+Description=AnalyzerFiles Spring Boot Service
+After=network.target
+
+[Service]
+Type=notify
+User=analyzerfiles
+Group=analyzerfiles
+WorkingDirectory=/opt/analyzerfiles
+ExecStart=/usr/bin/java -XX:MaxRAMPercentage=75.0 -jar /opt/analyzerfiles/analyzerfiles-1.0.0.jar
+Restart=on-failure
+RestartSec=5s
+SuccessExitStatus=143
+Environment="SPRING_CONFIG_LOCATION=/etc/analyzerfiles/application.yml"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

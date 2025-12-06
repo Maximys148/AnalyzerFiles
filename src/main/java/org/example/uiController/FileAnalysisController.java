@@ -42,30 +42,6 @@ public class FileAnalysisController {
     }
 
     /**
-     * HTML form analysis endpoint
-     */
-    @PostMapping("/analyze")
-    public String analyze(@RequestParam("originalDir") String originalDir,
-                          @RequestParam("damagedDir") String damagedDir,
-                          RedirectAttributes redirectAttributes) {
-        log.info("Starting analysis: originalDir={}, damagedDir={}", originalDir, damagedDir);
-        service.setDirectories(originalDir, damagedDir);
-
-        // Start analysis in background thread
-        new Thread(() -> {
-            try {
-                service.startAnalysis();
-                log.info("Analysis completed successfully");
-            } catch (Exception e) {
-                log.error("Analysis failed", e);
-            }
-        }).start();
-
-        redirectAttributes.addFlashAttribute("successMessage", " Analysis started!");
-        return "redirect:/";
-    }
-
-    /**
      * API: Start analysis (used by JavaScript)
      */
     @PostMapping("/api/v1/analyze")
