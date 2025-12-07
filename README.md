@@ -32,10 +32,10 @@ java -jar target/*.jar
 ## Production Installation (ALT Workstation K 11.1+)
 
 ### 1. Build RPM
-rpmdev-setuptree
-cp -r * ~/rpmbuild/SOURCES/
-cp rpm/*.spec ~/rpmbuild/SPECS/
-rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
+-rpmdev-setuptree
+-cp -r * ~/rpmbuild/SOURCES/
+-cp rpm/*.spec ~/rpmbuild/SPECS/
+-rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
 
 ### 2. Install & Run
 sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/file-damage-analyzer-*.rpm
@@ -44,11 +44,7 @@ sudo systemctl enable --now file-damage-analyzer
 ## Testing Guide
 
 ### 1. Create Test Data
-mkdir -p /tmp/{original,damaged}
-cp /usr/bin/{ls,cat,echo} /tmp/original/
-cd /tmp/damaged
-cp ../original/* .
-dd if=/dev/urandom of=ls bs=1 seek=444 count=3 conv=notrunc
+Using a Python script, create corrupted data, drag the whole data into one folder, and the corrupted data into the second
 
 ### 2. Test Workflow
 1. **Original**: `/tmp/original`
