@@ -36,7 +36,6 @@ public class FileAnalysisController {
         model.addAttribute("damagedDir", damagedDir != null ? damagedDir : "/tmp/damaged_bin");
         model.addAttribute("fileStatuses", service.getFileStatuses());
         model.addAttribute("stats", service.getAnalysisStats());
-        model.addAttribute("analysisRunning", service.isAnalysisRunning());
         model.addAttribute("successMessage", null);
         return "index";
     }

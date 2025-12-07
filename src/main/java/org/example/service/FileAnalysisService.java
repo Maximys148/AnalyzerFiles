@@ -99,7 +99,7 @@ public class FileAnalysisService {
                 status.setStatus("OK");
             } else {
                 status.setStatus("DAMAGED");
-                status.setDamageCount(damages.size());
+                status.setDamageCount(Integer.valueOf(damages.size()));
                 fileDamages.put(fileName, damages);
             }
         } catch (IOException e) {
