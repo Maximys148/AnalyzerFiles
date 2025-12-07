@@ -38,8 +38,8 @@ java -jar target/*.jar
 - rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
 
 ### 2. Install & Run
-sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/file-damage-analyzer-*.rpm
-sudo systemctl enable --now file-damage-analyzer
+- sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/file-damage-analyzer-*.rpm
+- sudo systemctl enable --now file-damage-analyzer
 
 ## Testing Guide
 
