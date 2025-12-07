@@ -24,10 +24,10 @@ Web application for comparing files between original and damaged directories. De
 | `/api/v1/details/{filename}` | GET | File damage details |
 
 ## Quick Start (Development)
-git clone <repository>
-cd file-damage-analyzer
-mvn clean package
-java -jar target/*.jar
+- git clone <repository>
+- cd file-damage-analyzer
+- mvn clean package
+- java -jar target/*.jar
 
 ## Production Installation (ALT Workstation K 11.1+)
 
