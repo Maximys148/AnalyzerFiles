@@ -32,10 +32,10 @@ java -jar target/*.jar
 ## Production Installation (ALT Workstation K 11.1+)
 
 ### 1. Build RPM
--rpmdev-setuptree
--cp -r * ~/rpmbuild/SOURCES/
--cp rpm/*.spec ~/rpmbuild/SPECS/
--rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
+- rpmdev-setuptree
+- cp -r * ~/rpmbuild/SOURCES/
+- cp rpm/*.spec ~/rpmbuild/SPECS/
+- rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
 
 ### 2. Install & Run
 sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/file-damage-analyzer-*.rpm
