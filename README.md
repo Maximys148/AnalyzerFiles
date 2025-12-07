@@ -1,31 +1,73 @@
 # File Damage Analyzer
 
-## Overview
-This project is a web application designed to compare files between an original directory and a damaged directory, detect differences (damages), and present detailed analysis results. It uses Spring Boot for backend services, Thymeleaf for rendering the main page, and exposes REST API endpoints for starting analysis and retrieving results.
-
-## Features
-- File comparison between two directories.
-- Detailed byte-level damage detection in files.
-- Status summary of all files (OK, DAMAGED, MISSING).
-- REST API to start analysis and get results.
-- Simple, clean UI with Bootstrap and Thymeleaf.
-
-## Technologies Used
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=for-the-badge&logo=thymeleaf&logoColor=white)
 
-## Project Structure
-- `FileAnalysisService` — core service performing asynchronous file comparison.
-- `FileAnalysisController` — Spring MVC controller handling HTML page requests and REST API.
-- DTOs for transferring file status and damage details.
+## Overview
+Web application for comparing files between original and damaged directories. Detects byte-level differences and provides detailed damage analysis with REST API and clean UI.
 
-### Prerequisites
-- JDK 17+
-- Maven or Gradle build tool
-- Access to directories with original and damaged files for testing
+## Features
+- Asynchronous directory comparison
+- Byte-by-byte file damage detection  
+- File status: OK, DAMAGED, MISSING
+- Detailed damage reports: offset, bytes, delta, damage type
+- REST API + Bootstrap/Thymeleaf UI
 
-### Running the Application
-1. Clone the repository.
-2. Configure `application.properties` if necessary (e.g., server port).
-3. Build the project:
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Main HTML page |
+| `/api/v1/analyze` | POST | Start analysis `{originalDir, damagedDir}` |
+| `/api/v1/results` | GET | Get results + status |
+| `/api/v1/details/{filename}` | GET | File damage details |
+
+## Quick Start (Development)
+git clone <repository>
+cd file-damage-analyzer
+mvn clean package
+java -jar target/*.jar
+
+## Production Installation (ALT Workstation K 11.1+)
+
+### 1. Build RPM
+rpmdev-setuptree
+cp -r * ~/rpmbuild/SOURCES/
+cp rpm/*.spec ~/rpmbuild/SPECS/
+rpmbuild -ba ~/rpmbuild/SPECS/file-damage-analyzer.spec
+
+### 2. Install & Run
+sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/file-damage-analyzer-*.rpm
+sudo systemctl enable --now file-damage-analyzer
+
+## Testing Guide
+
+### 1. Create Test Data
+mkdir -p /tmp/{original,damaged}
+cp /usr/bin/{ls,cat,echo} /tmp/original/
+cd /tmp/damaged
+cp ../original/* .
+dd if=/dev/urandom of=ls bs=1 seek=444 count=3 conv=notrunc
+
+### 2. Test Workflow
+1. **Original**: `/tmp/original`
+2. **Damaged**: `/tmp/damaged` 
+3. **Start Analysis** → **Get Results** → **Show Details**
+
+### Expected Output
+File: ls | Status: DAMAGED | Damages: 3
+61 0x3D → 57 0x39 Δ=4
+34 0x22 → 19 0x13 Δ=15
+
+## Damage Details
+
+| Field | Meaning |
+|-------|---------|
+| `[444]` | Byte offset |
+| `61` | Original (DEC) |
+| `0x3D` | Original (HEX) |
+| `→` | Changed to |
+| `57` | Damaged (DEC) |
+| `0x39` | Damaged (HEX) |
+| `Δ=4` | Difference |
